@@ -1,0 +1,40 @@
+
+POST http://localhost:8000/authors
+content-type: application/json
+
+{
+    "name": "mr jelili",
+    "gender": "male",
+    "country": "Naija"
+}
+
+
+###
+
+GET http://localhost:8000
+
+###
+
+GET http://localhost:8000/authors
+Content-Type: application/json
+
+###
+
+GET http://localhost:8000/authors/3
+Content-Type: application/json
+
+###
+
+PUT http://localhost:8000/authors/update/2
+content-type: application/json
+
+{
+    "name": "mr jelili",
+    "gender": "male",
+    "country": "Naija"
+}
+
+###
+
+DELETE http://localhost:8000/authors/delete/1
+Content-Type: application/json
