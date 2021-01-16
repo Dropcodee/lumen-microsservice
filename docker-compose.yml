@@ -1,0 +1,120 @@
+version: '3'
+services:
+  webserver:
+    image: nginx:alpine
+    restart: always
+    tty: true
+    ports:
+      - "83:83"
+      - "443:443"
+    volumes:
+      - ./authorsService/:/var/www/authorservice
+      - ./lumenBooksService/:/var/www/bookservice
+      - ./lumenApiGateway/:/var/www/gatewayservice
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/sites/:/etc/nginx/conf.d/
+      - ./docker/nginx/ssl/:/etc/ssl/
+    networks:
+      - microservice-network
+  authorservice:
+    build:
+      context: ./authorsService
+      dockerfile: DockerFile
+    image: authorservice
+    restart: always
+    tty: true
+    environment:
+      SERVICE_NAME: AuthorService
+      SERVICE_TAGS: dev
+    working_dir: /var/www/authorservice
+    volumes:
+      - ./authorsService/:/var/www/authorservice
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - microservice-network
+  booksService:
+    build:
+      context: ./lumenBooksService
+      dockerfile: DockerFile
+    image: bookservice
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: BooksService
+      SERVICE_TAGS: dev
+    working_dir: /var/www/bookservice
+    volumes:
+      - ./lumenBooksService/:/var/www/bookservice
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - microservice-network
+  gatewayService:
+    build:
+      context: ./lumenApiGateway
+      dockerfile: DockerFile
+    image: gatewayservice
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: GatewayService
+      SERVICE_TAGS: dev
+    working_dir: /var/www/gatewayService
+    volumes:
+      - ./lumenApiGateway/:/var/www/gatewayService
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - microservice-network
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: book_db
+      MYSQL_ROOT_PASSWORD: root
+      SERVICE_NAME: mysql
+      SERVICE_TAGS: dev
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - microservice-network
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: books_db
+      MYSQL_ROOT_PASSWORD: root
+      SERVICE_NAME: mysql
+      SERVICE_TAGS: dev
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - microservice-network
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: gateway_db
+      MYSQL_ROOT_PASSWORD: root
+      SERVICE_NAME: mysql
+      SERVICE_TAGS: dev
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - microservice-network
+networks:
+  microservice-network:
+    driver: bridge
+volumes:
+  dbdata:
+    driver: local

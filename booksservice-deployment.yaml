@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: booksservice
+  name: booksservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: booksservice
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/microservice-network: "true"
+        io.kompose.service: booksservice
+    spec:
+      containers:
+        - env:
+            - name: SERVICE_NAME
+              value: BooksService
+            - name: SERVICE_TAGS
+              value: dev
+          image: bookservice
+          name: booksservice
+          resources: {}
+          tty: true
+          volumeMounts:
+            - mountPath: /var/www/bookservice
+              name: booksservice-claim0
+            - mountPath: /usr/local/etc/php/conf.d/local.ini
+              name: booksservice-claim1
+          workingDir: /var/www/bookservice
+      restartPolicy: Always
+      volumes:
+        - name: booksservice-claim0
+          persistentVolumeClaim:
+            claimName: booksservice-claim0
+        - name: booksservice-claim1
+          persistentVolumeClaim:
+            claimName: booksservice-claim1
+status: {}

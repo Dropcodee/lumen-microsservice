@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: gatewayservice
+  name: gatewayservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: gatewayservice
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yml
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/microservice-network: "true"
+        io.kompose.service: gatewayservice
+    spec:
+      containers:
+        - env:
+            - name: SERVICE_NAME
+              value: GatewayService
+            - name: SERVICE_TAGS
+              value: dev
+          image: gatewayservice
+          name: gatewayservice
+          resources: {}
+          tty: true
+          volumeMounts:
+            - mountPath: /var/www/gatewayService
+              name: gatewayservice-claim0
+            - mountPath: /usr/local/etc/php/conf.d/local.ini
+              name: gatewayservice-claim1
+          workingDir: /var/www/gatewayService
+      restartPolicy: Always
+      volumes:
+        - name: gatewayservice-claim0
+          persistentVolumeClaim:
+            claimName: gatewayservice-claim0
+        - name: gatewayservice-claim1
+          persistentVolumeClaim:
+            claimName: gatewayservice-claim1
+status: {}
